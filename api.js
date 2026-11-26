@@ -26,6 +26,5 @@ export async function uploadMedia(file, context = {}) {
     signed.path, signed.token, file, { contentType: file.type || "application/octet-stream" }
   );
   if (error) throw error;
-  const { data: publicData } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(signed.path);
-  return { path: signed.path, url: publicData.publicUrl };
+  return { path: signed.path, url: null };
 }
