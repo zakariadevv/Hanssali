@@ -1,5 +1,5 @@
 import { supabase } from "./supabase.js";
-import { api, toast, uploadMedia } from "./api.js";
+import { api, toast } from "./api.js";
 import { watchClassroom } from "./classroom.js";
 import { showPresentation } from "./presentation.js";
 const $=id=>document.getElementById(id);
@@ -30,7 +30,14 @@ async function refresh(){
  $("stageMode").textContent=room.current_mode.toUpperCase()+" MODE";
 }
 function renderContent(c,theme={}){
- const host=$("teacherContent");host.innerHTML="";
+ const host=$("teacherContent"),presentationPanel=$("presentationPanel");
+ const isPresentation=c?.kind==="presentation";
+ if(!isPresentation&&!presentationPanel.classList.contains("hidden")){
+  presentationPanel.classList.add("hidden");
+  $("presentationFrame").replaceChildren();
+  delete $("presentationFrame").dataset.presentationUrl;
+ }
+ host.innerHTML="";
  if(!c){host.innerHTML='<p class="stage-placeholder">Your teacher is preparing the room.</p>';return;}
  if(c.kind==="text"){const el=document.createElement("div");el.className="content-text";el.textContent=c.payload.text||"";el.style.color=theme.foreground||"#152B45";host.append(el);}
  else if(c.kind==="image"){const img=document.createElement("img");img.className="content-image";img.alt=c.payload.name||"Classroom image";host.append(img);mediaUrl(c.payload.path||c.payload.url).then(url=>img.src=url).catch(()=>{});}
