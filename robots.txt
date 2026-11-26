@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hanssali.pages.dev/sitemap.xml
