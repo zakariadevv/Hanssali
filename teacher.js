@@ -112,6 +112,7 @@ $("deleteClassroom").addEventListener("click",async()=>{
     if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}
     localStorage.removeItem("hansali_teacher_token");
     localStorage.removeItem("hansali_classroom_id");
+    removeSavedSession(classroom.id);
     teacherToken="";classroom=null;activeQuestion=null;activeCanvasDocument=null;
     canvasEditor.loadDocument(null);
     $("classroomPanel").classList.add("hidden");
