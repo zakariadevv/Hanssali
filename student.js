@@ -57,16 +57,19 @@ async function renderCanvas(host,documentData){
 }
 function renderQuestion(q,r){
  const qBox=$("questionDisplay"),composer=$("answerComposer");
- if(q&&!q.is_hidden){qBox.classList.remove("hidden");qBox.innerHTML="";const layout=q.display_layout||{direction:"vertical",order:"text-first",align:"center",image_width:55};qBox.style.flexDirection=layout.direction==="horizontal"?(layout.order==="image-first"?"row-reverse":"row"):(layout.order==="image-first"?"column-reverse":"column");qBox.style.alignItems=layout.align==="left"?"flex-start":layout.align==="right"?"flex-end":"center";qBox.style.setProperty("--question-image-width",Math.max(20,Math.min(90,Number(layout.image_width)||55))+"%");qBox.style.textAlign=layout.align||"center";const prompt=document.createElement("div");prompt.className="question-prompt";prompt.textContent=q.prompt;qBox.append(prompt);if(q.attachment_path){const image=document.createElement("img");image.className="question-attachment";image.alt="Question attachment";mediaUrl(q.attachment_path).then(url=>image.src=url).catch(()=>{});qBox.append(image);}composer.classList.toggle("hidden",!q.is_open||!r.submissions_enabled||!r.participation_enabled);$("answerText").disabled=!q.allow_text;$("answerImage").disabled=!q.allow_image;$("answerLink").disabled=!q.allow_link;}
- else{qBox.classList.add("hidden");composer.classList.add("hidden");}
+ if(q&&!q.is_hidden){
+  qBox.classList.remove("hidden");qBox.innerHTML="";
+  const prompt=document.createElement("div");prompt.className="question-prompt";prompt.textContent=q.prompt;qBox.append(prompt);
+  composer.classList.toggle("hidden",!q.is_open||!r.submissions_enabled||!r.participation_enabled);
+  $("answerText").disabled=!q.allow_text;
+ }else{qBox.classList.add("hidden");composer.classList.add("hidden");}
  $("answerWallSection").classList.toggle("hidden",!q?.show_answers||q?.is_hidden);
 }
 function renderWall(items){
- $("wallCount").textContent=`${items.length} IDEAS`;
- $("answerWall").innerHTML=items.map((a,i)=>`<article class="answer-card ${a.is_highlighted?"highlight":""}" style="--tilt:${((i%5)-2)*1.1}deg"><p>${escapeHtml(a.text_content||"")}</p>${a.image_path?`<img data-media-path="${escapeHtml(a.image_path)}" alt="Student attachment">`:""}${a.link_url?`<a href="${escapeHtml(a.link_url)}" target="_blank" rel="noopener">Open shared link ↗</a>`:""}${room?.identities_visible&&a.display_name?`<small>${escapeHtml(a.display_name)}</small>`:""}</article>`).join("");
- [...document.querySelectorAll("#answerWall [data-media-path]")].forEach(img=>mediaUrl(img.dataset.mediaPath).then(url=>img.src=url).catch(()=>{}));
+ $("wallCount").textContent=items.length+" IDEAS";
+ $("answerWall").innerHTML=items.map((a,i)=>'<article class="answer-card '+(a.is_highlighted?"highlight":"") + '" style="--tilt:'+(((i%5)-2)*1.1)+'deg"><p>'+escapeHtml(a.text_content||"") + '</p>'+(room?.identities_visible&&a.display_name?'<small>'+escapeHtml(a.display_name)+'</small>':"")+'</article>').join("");
 }
-$("answerForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentQuestion)return;const btn=e.submitter;btn.disabled=true;$("answerFeedback").textContent="Sending…";try{let imagePath=null;const file=$("answerImage").files[0];if(file){const up=await uploadMedia(file,{classroomId:room.id,participantToken,questionId:currentQuestion.id});imagePath=up.path;}await api("submit_answer",{participantToken,questionId:currentQuestion.id,text:$("answerText").value,imagePath,linkUrl:$("answerLink").value});$("answerText").value="";$("answerImage").value="";$("answerLink").value="";$("answerFeedback").textContent="Your answer has been shared.";toast("Answer sent.","studentToast");}catch(e){$("answerFeedback").textContent=e.message;}finally{btn.disabled=false;}});
+$("answerForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentQuestion)return;const btn=e.submitter;btn.disabled=true;$("answerFeedback").textContent="Sending…";try{await api("submit_answer",{participantToken,questionId:currentQuestion.id,text:$("answerText").value});$("answerText").value="";$("answerFeedback").textContent="Your answer has been shared.";toast("Answer sent.","studentToast");}catch(e){$("answerFeedback").textContent=e.message;}finally{btn.disabled=false;}});
 $("expandPresentation").addEventListener("click",()=>$("presentationPanel").classList.toggle("floating"));
 $("fullscreenPresentation").addEventListener("click",()=>{const el=$("presentationPanel");if(!document.fullscreenElement)el.requestFullscreen?.();else document.exitFullscreen?.();});
 const saved=JSON.parse(sessionStorage.getItem("hansali_participant")||"null");
