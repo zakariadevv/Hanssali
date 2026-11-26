@@ -45,6 +45,26 @@ async function loadRoom(room){classroom=room;localStorage.setItem("hansali_class
 $("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
 $("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
 $("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
+$("deleteClassroom").addEventListener("click",async()=>{
+  if(!classroom)return;
+  const title=classroom.title||"this classroom";
+  if(!confirm(`Delete "${title}" permanently? This removes its slides, questions, answers, participants and uploaded files. Students will be disconnected. This cannot be undone.`))return;
+  const button=$("deleteClassroom");button.disabled=true;button.textContent="Deleting…";
+  try{
+    await teacherCall("delete_classroom",{classroomId:classroom.id});
+    if(stopWatch){stopWatch();stopWatch=null;}
+    if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}
+    localStorage.removeItem("hansali_teacher_token");
+    localStorage.removeItem("hansali_classroom_id");
+    teacherToken="";classroom=null;activeQuestion=null;activeCanvasDocument=null;
+    canvasEditor.loadDocument(null);
+    $("classroomPanel").classList.add("hidden");
+    $("noClassroom").classList.remove("hidden");
+    $("roomTitle").value="";
+    button.disabled=false;button.textContent="Delete classroom";
+    toast("Classroom and its data were permanently deleted.");
+  }catch(e){button.disabled=false;button.textContent="Delete classroom";toast(e.message||"Could not delete the classroom.");}
+});
 async function setRoom(patch){try{const r=await teacherCall("update_classroom",{classroomId:classroom.id,patch});classroom=r.classroom;await refresh();}catch(e){toast(e.message);}}
 $("toggleOpen").addEventListener("change",e=>setRoom({status:e.target.checked?"open":"closed"}));
 $("toggleParticipation").addEventListener("change",e=>setRoom({participation_enabled:e.target.checked}));
