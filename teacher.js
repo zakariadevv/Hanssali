@@ -4,13 +4,12 @@ import { watchClassroom } from "./classroom.js";
 const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
 let classroom = null, stopWatch = null, activeQuestion = null;
-const gate = $("teacherGate"), studio = $("teacherStudio");
-function showStudio() { gate.classList.add("hidden"); studio.classList.remove("hidden"); }
-function showGate() { studio.classList.add("hidden"); gate.classList.remove("hidden"); }
+const studio = $("teacherStudio");
+function showStudio() { studio.classList.remove("hidden"); }
 async function teacherCall(action, extra={}) { return api(action,{teacherToken,...extra}); }
 async function refresh() {
   if (!classroom) return;
-  const data = await api("load", {teacherToken, classroomId:classroom.id}, "hansali-teacher-data");
+  const data = await api("load", {teacherToken, classroomId:classroom.id});
   classroom=data.classroom;
   $("roomTitleDisplay").textContent=classroom.title;
   $("roomCodeDisplay").textContent=classroom.room_code;
@@ -36,9 +35,8 @@ function mediaUrl(path){return supabase.storage.from("hansali-media").getPublicU
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
 async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
-$("teacherAuthForm").addEventListener("submit",async e=>{e.preventDefault();$("gateError").textContent="Checking code…";try{const r=await api("teacher_auth",{code:$("teacherCode").value});teacherToken=r.token;localStorage.setItem("hansali_teacher_token",teacherToken);$("teacherCode").value="";$("gateError").textContent="";showStudio();}catch(err){$("gateError").textContent=err.message;}});
-$("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
-$("logoutTeacher").addEventListener("click",async()=>{try{await teacherCall("teacher_revoke_session");}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(stopWatch)stopWatch();showGate();});
+$("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
+$("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
 $("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
 async function setRoom(patch){try{const r=await teacherCall("update_classroom",{classroomId:classroom.id,patch});classroom=r.classroom;await refresh();}catch(e){toast(e.message);}}
 $("toggleOpen").addEventListener("change",e=>setRoom({status:e.target.checked?"open":"closed"}));
@@ -56,8 +54,8 @@ $("clearAnswers").addEventListener("click",async()=>{if(!activeQuestion)return t
 if(teacherToken){
   const savedRoomId=localStorage.getItem("hansali_classroom_id");
   if(savedRoomId){
-    api("load",{teacherToken,classroomId:savedRoomId},"hansali-teacher-data")
+    api("load",{teacherToken,classroomId:savedRoomId})
       .then(data=>loadRoom(data.classroom))
-      .catch(()=>{localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";showGate();});
+      .catch(()=>{localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";showStudio();});
   } else showStudio();
 }
