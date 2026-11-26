@@ -7,3 +7,6 @@
 .layout-fields input[type=range]{width:100%}
 .layout-fields output{font:10px var(--mono);color:var(--blue)}
 @media(max-width:620px){.layout-fields{grid-template-columns:1fr}}
+
+/* Replace the old single-item publishing cards with the slide editor. */
+#tab-content>.panel-title,.publish-tools,.current-content{display:none!important}
