@@ -27,7 +27,7 @@ function renderSavedSessions(){
  list.querySelectorAll("[data-open-saved]").forEach(button=>button.addEventListener("click",async()=>{
   const item=readSavedSessions().find(x=>x.id===button.dataset.openSaved);if(!item)return;
   button.disabled=true;button.textContent="Opening…";
-  try{teacherToken=item.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);localStorage.setItem("hansali_classroom_id",item.id);const data=await api("load",{teacherToken,classroomId:item.id});await loadRoom(data.classroom);toast("Saved session opened.");}
+  try{teacherToken=item.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);localStorage.setItem("hansali_classroom_id",item.id);await api("update_classroom",{teacherToken,classroomId:item.id,patch:{status:"open"}});const data=await api("load",{teacherToken,classroomId:item.id});await loadRoom(data.classroom);toast("Saved session reopened. Students must join again with the room code.");}
   catch(error){removeSavedSession(item.id);toast("This saved session is no longer available.");}
   finally{button.disabled=false;button.textContent="Open session";}
  }));
