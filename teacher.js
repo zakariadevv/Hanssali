@@ -5,7 +5,7 @@ import { createCanvasEditor } from "./canvas-editor.js";
 const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
 let classroom = null, stopWatch = null, activeQuestion = null, activeCanvasDocument = null;
-const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onToast:message=>toast(message)});
+const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onResolveImage:path=>mediaUrl(path),onToast:message=>toast(message)});
 const studio = $("teacherStudio");
 function showStudio() { studio.classList.remove("hidden"); }
 async function teacherCall(action, extra={}) { return api(action,{teacherToken,...extra}); }
