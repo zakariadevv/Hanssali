@@ -99,3 +99,9 @@
 .classroom-screen{padding-bottom:190px}
 @media(max-width:750px){.question-display .answer-wall-section{max-height:30vh;padding:13px;border-radius:17px}.question-display .answer-wall{grid-template-columns:1fr;gap:8px}.question-display .answer-card{min-height:58px;padding:12px 13px}#answerComposer.answer-composer{width:calc(100vw - 20px);bottom:10px;padding:10px;border-radius:18px}#answerComposer .composer-heading{font-size:8px;margin:0 3px 7px}#answerComposer form{grid-template-columns:minmax(0,1fr) auto;gap:7px}#answerComposer textarea{min-height:46px;max-height:92px;padding:11px 12px;font-size:13px}#answerComposer .btn{min-height:46px;padding:0 12px;font-size:11px}#answerComposer .tiny{font-size:10px}.classroom-screen{padding-bottom:165px}}
 @media(prefers-reduced-motion:reduce){.question-display .answer-card{animation:none}}
+
+/* Shared HANSALI identity on the student screen */
+.student-top{background:rgba(255,255,255,.24)}
+.live-state{color:#668eae}
+.live-state i{background:linear-gradient(135deg,#8ccBff,#d8b5cf)}
+.answer-card.highlight{outline-color:#91a9d2}
