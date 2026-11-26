@@ -1,0 +1,9 @@
+-- HANSALI database schema is installed in the connected Supabase project.
+-- This file documents the schema installation. The project migration is named:
+-- hansali_initial_schema
+-- teacher_sessions_global_access
+-- Edge Functions:
+--   hansali-api (teacher auth, classroom actions, join, submit, moderation)
+--   hansali-teacher-data (teacher-only classroom overview)
+-- Never place SUPABASE_SERVICE_ROLE_KEY in this project.
+-- The browser uses the publishable key from js/config.js.
