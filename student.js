@@ -50,7 +50,7 @@ async function renderCanvas(host,documentData){
   const el=document.createElement("div");el.className="student-canvas-element";el.style.left=(Number(item.x||0)/1280*100)+"%";el.style.top=(Number(item.y||0)/720*100)+"%";el.style.width=(Number(item.w||100)/1280*100)+"%";el.style.height=(Number(item.h||80)/720*100)+"%";el.style.transform="rotate("+(Number(item.rotation)||0)+"deg)";el.style.opacity=String(item.opacity??1);
   if(item.type==="text"){el.classList.add("student-canvas-text");el.textContent=item.text||"";el.style.fontSize="clamp(8px,"+(Math.max(8,Number(item.fontSize)||36)/1280*100)+"cqw,90px)";el.style.color=item.color||"#172b45";el.style.fontFamily=item.fontFamily||"Arial";el.style.fontWeight=item.bold?"700":"400";el.style.textAlign=item.align||"left";}
   else if(item.type==="image"){const img=document.createElement("img");img.alt="Presentation image";img.style.objectFit=item.fit==="cover"?"cover":"contain";el.append(img);if(item.path)mediaUrl(item.path).then(url=>img.src=url).catch(()=>{});}
-  else{el.classList.add("student-canvas-shape");el.style.background=item.fill||"#4169e1";if(item.shape==="circle")el.style.borderRadius="50%";}
+  else{el.classList.add("student-canvas-shape");el.style.background=item.fill||"#4169e1";el.style.borderRadius=item.shape==="circle"?"50%":"0";}
   stage.append(el);
  }
  host.append(stage);
