@@ -52,3 +52,12 @@
 @media(max-width:750px){.question-display[style*="row"]{flex-direction:column!important}.question-display .question-attachment{width:min(100%,var(--question-image-width,55%));max-height:34vh}}
 
 .question-display[style*="row"] .question-prompt{width:auto;}
+
+/* Live student view of the teacher's multi-slide canvas */
+.teacher-content:has(.student-canvas-slide){width:100%;align-items:center;justify-content:center}
+.student-canvas-slide{position:relative;width:min(100%,1120px);aspect-ratio:16/9;overflow:hidden;container-type:inline-size;box-shadow:0 12px 32px #152b4520}
+.student-canvas-element{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.student-canvas-element img{width:100%;height:100%;object-fit:contain}
+.student-canvas-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.15;padding:3px;justify-content:flex-start}
+.student-canvas-shape{background:#4169e1}
+.student-slide-counter{position:absolute;z-index:2;right:10px;bottom:8px;padding:4px 7px;background:#152b4580;color:#fff;border-radius:4px;font:9px var(--mono)}
