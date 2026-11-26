@@ -11,7 +11,7 @@ async function mediaUrl(path){const {data,error}=await supabase.storage.from(MED
 async function join(code,name){
  const r=await api("join_classroom",{roomCode:code,displayName:name});
  room=r.classroom;participantToken=r.token;participantId=r.participantId;
- sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));
+
  try{
   $("classTitle").textContent=room.title.toUpperCase();
   $("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;
@@ -25,7 +25,7 @@ async function join(code,name){
  }catch(err){
   if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}
   if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
-  sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;
+  participantToken="";participantId="";room=null;
   throw err;
  }
 }
@@ -33,7 +33,6 @@ $("joinForm").addEventListener("submit",async e=>{e.preventDefault();$("joinErro
 function showEndedClassroom(){
  if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}
  if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
- sessionStorage.removeItem("hansali_participant");
  participantToken="";participantId="";room=null;currentQuestion=null;
  $("classroomScreen").classList.add("hidden");$("joinScreen").classList.remove("hidden");
  $("joinError").textContent="This classroom has ended or was deleted by the teacher.";
@@ -105,17 +104,5 @@ function renderWall(items){
 $("answerForm").addEventListener("submit",async e=>{e.preventDefault();if(!currentQuestion)return;const btn=e.submitter;btn.disabled=true;$("answerFeedback").textContent="Sending…";try{await api("submit_answer",{participantToken,questionId:currentQuestion.id,text:$("answerText").value});$("answerText").value="";$("answerFeedback").textContent="Your answer has been shared.";toast("Answer sent.","studentToast");}catch(e){$("answerFeedback").textContent=e.message;}finally{btn.disabled=false;}});
 $("expandPresentation").addEventListener("click",()=>$("presentationPanel").classList.toggle("floating"));
 $("fullscreenPresentation").addEventListener("click",()=>{const el=$("presentationPanel");if(!document.fullscreenElement)el.requestFullscreen?.();else document.exitFullscreen?.();});
-const saved=JSON.parse(sessionStorage.getItem("hansali_participant")||"null");
-if(saved?.token&&saved.room){
- api("resume_participant",{participantToken:saved.token}).then(async r=>{
-  participantToken=saved.token;participantId=r.participantId;room=r.classroom;
-  $("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");
-  $("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent="ROOM / "+room.room_code;
-  const ready=await refresh();
-  if(!ready)return;
-  if(refreshTimer)clearInterval(refreshTimer);
-  refreshTimer=setInterval(()=>{if(room&&participantToken)refresh().catch(err=>toast(err.message,"studentToast"));},4000);
-  if(heartbeatTimer)clearInterval(heartbeatTimer);
-  heartbeatTimer=setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);
- }).catch(()=>{sessionStorage.removeItem("hansali_participant");});
-}
+// Student access is intentionally not persisted: every page visit requires the room code.
+sessionStorage.removeItem("hansali_participant");
