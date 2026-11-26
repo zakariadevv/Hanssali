@@ -25,3 +25,7 @@
 
 /* Preserve spaces and line breaks in teacher text and answers. */
 .question-manage-copy strong,.teacher-answer p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Match teacher studio accents to the HANSALI gradient identity */
+.tab.active{box-shadow:inset 0 -2px transparent;border-image:linear-gradient(90deg,#8ccBff,#c8cdd8,#f3b9d5) 1}
+.room-banner{background:linear-gradient(125deg,#202b3c 0%,#293b55 68%,#3c3b55 100%)}
