@@ -56,14 +56,15 @@ async function renderCanvas(host,documentData){
  host.append(stage);
 }
 function renderQuestion(q,r){
- const qBox=$("questionDisplay"),composer=$("answerComposer");
+ const qBox=$("questionDisplay"),composer=$("answerComposer"),wallSection=$("answerWallSection");
  if(q&&!q.is_hidden){
   qBox.classList.remove("hidden");qBox.innerHTML="";
   const prompt=document.createElement("div");prompt.className="question-prompt";prompt.textContent=q.prompt;qBox.append(prompt);
+  wallSection.classList.toggle("hidden",!q.show_answers);
+  qBox.append(wallSection);
   composer.classList.toggle("hidden",!q.is_open||!r.submissions_enabled||!r.participation_enabled);
   $("answerText").disabled=!q.allow_text;
- }else{qBox.classList.add("hidden");composer.classList.add("hidden");}
- $("answerWallSection").classList.toggle("hidden",!q?.show_answers||q?.is_hidden);
+ }else{qBox.classList.add("hidden");wallSection.classList.add("hidden");composer.classList.add("hidden");}
 }
 function renderWall(items){
  $("wallCount").textContent=items.length+" IDEAS";
