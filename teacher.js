@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import { MEDIA_BUCKET } from "./config.js";
 import { api, toast, uploadMedia } from "./api.js";
 import { watchClassroom } from "./classroom.js";
 import { createCanvasEditor } from "./canvas-editor.js";
@@ -36,7 +37,7 @@ async function refresh() {
   await Promise.all([...document.querySelectorAll("#teacherAnswerWall [data-media-path]")].map(async img=>{try{img.src=await mediaUrl(img.dataset.mediaPath);}catch{}}));
   document.querySelectorAll("[data-highlight]").forEach(b=>b.addEventListener("click",async()=>{await teacherCall("highlight_answer",{classroomId:classroom.id,answerId:b.dataset.highlight,highlighted:b.dataset.value==="true"});await refresh();}));
 }
-async function mediaUrl(path){const {data,error}=await supabase.storage.from("hanssali-media").createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
+async function mediaUrl(path){const {data,error}=await supabase.storage.from(MEDIA_BUCKET).createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
 function ensureAnswerPolling(){if(answerRefreshTimer)return;answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);}
