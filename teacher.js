@@ -48,7 +48,7 @@ $("toggleParticipation").addEventListener("change",e=>setRoom({participation_ena
 $("toggleSubmissions").addEventListener("change",e=>setRoom({submissions_enabled:e.target.checked}));
 $("toggleIdentities").addEventListener("change",e=>setRoom({identities_visible:e.target.checked}));
 document.querySelectorAll("[data-theme]").forEach(b=>b.addEventListener("click",()=>{const themes={paper:{background:"#F3F0E8",foreground:"#152B45",accent:"#4169E1"},navy:{background:"#152B45",foreground:"#F3F0E8",accent:"#9CB7FF"},blue:{background:"#4169E1",foreground:"#FFFFFF",accent:"#D9DDE5"}};setRoom({theme:{...classroom.theme,...themes[b.dataset.theme]}});toast("Theme updated.");}));
-document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".tool-panel").forEach(x=>x.classList.add("hidden"));$("tab-"+b.dataset.tab).classList.remove("hidden");}));
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",async()=>{document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".tool-panel").forEach(x=>x.classList.add("hidden"));$("tab-"+b.dataset.tab).classList.remove("hidden");if(b.dataset.tab==="answers")try{await refresh();}catch(e){toast(e.message);}}));
 $("textContentForm").addEventListener("submit",async e=>{e.preventDefault();try{await teacherCall("publish_content",{classroomId:classroom.id,kind:"text",payload:{text:$("contentText").value}});$("contentText").value="";await refresh();toast("Text published.");}catch(e){toast(e.message);}});
 $("linkContentForm").addEventListener("submit",async e=>{e.preventDefault();try{const url=$("contentLink").value;if(!/^https?:\/\//i.test(url))throw Error("Enter a valid http(s) URL.");await teacherCall("publish_content",{classroomId:classroom.id,kind:"link",payload:{url}});$("contentLink").value="";await refresh();toast("Link shared.");}catch(e){toast(e.message);}});
 $("fileContentForm").addEventListener("submit",async e=>{e.preventDefault();const f=$("contentFile").files[0];if(!f)return toast("Choose a file first.");try{const up=await uploadMedia(f,{classroomId:classroom.id,teacherToken});const kind=f.type.startsWith("image/")?"image":f.type.startsWith("video/")?"video":"presentation";await teacherCall("publish_content",{classroomId:classroom.id,kind,payload:{url:up.url,path:up.path,name:f.name,mime:f.type}});$("contentFile").value="";await refresh();toast("File published.");}catch(e){toast(e.message);}});
@@ -56,7 +56,10 @@ $("questionForm").addEventListener("submit",async e=>{e.preventDefault();try{con
 
 async function questionPatch(patch){try{await teacherCall("update_question",{classroomId:classroom.id,questionId:activeQuestion.id,patch});await refresh();}catch(e){toast(e.message);}}
 $("clearAnswers").addEventListener("click",async()=>{if(!activeQuestion)return toast("No active question.");if(!confirm("Clear all answers for this question?"))return;try{await teacherCall("clear_answers",{classroomId:classroom.id,questionId:activeQuestion.id});await refresh();toast("Answers cleared.");}catch(e){toast(e.message);}});
+let answerRefreshTimer=null;
 if(teacherToken){
+  if(answerRefreshTimer)clearInterval(answerRefreshTimer);
+  answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);
   const savedRoomId=localStorage.getItem("hansali_classroom_id");
   if(savedRoomId){
     api("load",{teacherToken,classroomId:savedRoomId})
