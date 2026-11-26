@@ -50,3 +50,5 @@
 .question-display .question-prompt{flex:1 1 auto;min-width:0;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:inherit}
 .question-display .question-attachment{display:block;flex:0 1 auto;width:var(--question-image-width,55%);max-width:100%;max-height:48vh;height:auto;object-fit:contain;margin:0;border-radius:10px}
 @media(max-width:750px){.question-display[style*="row"]{flex-direction:column!important}.question-display .question-attachment{width:min(100%,var(--question-image-width,55%));max-height:34vh}}
+
+.question-display[style*="row"] .question-prompt{width:auto;}
