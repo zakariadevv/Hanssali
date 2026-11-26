@@ -4,7 +4,7 @@ import { watchClassroom } from "./classroom.js";
 import { createCanvasEditor } from "./canvas-editor.js";
 const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
-let classroom = null, stopWatch = null, activeQuestion = null, activeCanvasDocument = null;
+let classroom = null, stopWatch = null, activeQuestion = null, activeCanvasDocument = null, answerRefreshTimer = null;
 const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onResolveImage:path=>mediaUrl(path),onToast:message=>toast(message)});
 const studio = $("teacherStudio");
 function showStudio() { studio.classList.remove("hidden"); }
@@ -39,9 +39,10 @@ async function refresh() {
 async function mediaUrl(path){const {data,error}=await supabase.storage.from("hanssali-media").createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
-async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
+function ensureAnswerPolling(){if(answerRefreshTimer)return;answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);}
+async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);ensureAnswerPolling();if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
 $("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
-$("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
+$("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
 $("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
 async function setRoom(patch){try{const r=await teacherCall("update_classroom",{classroomId:classroom.id,patch});classroom=r.classroom;await refresh();}catch(e){toast(e.message);}}
 $("toggleOpen").addEventListener("change",e=>setRoom({status:e.target.checked?"open":"closed"}));
@@ -55,12 +56,8 @@ $("linkContentForm").addEventListener("submit",async e=>{e.preventDefault();try{
 $("fileContentForm").addEventListener("submit",async e=>{e.preventDefault();const f=$("contentFile").files[0];if(!f)return toast("Choose a file first.");try{const up=await uploadMedia(f,{classroomId:classroom.id,teacherToken});const kind=f.type.startsWith("image/")?"image":f.type.startsWith("video/")?"video":"presentation";await teacherCall("publish_content",{classroomId:classroom.id,kind,payload:{url:up.url,path:up.path,name:f.name,mime:f.type}});$("contentFile").value="";await refresh();toast("File published.");}catch(e){toast(e.message);}});
 $("questionForm").addEventListener("submit",async e=>{e.preventDefault();try{const prompt=$("questionPrompt").value;if(!prompt.trim())return;await teacherCall("publish_question",{classroomId:classroom.id,prompt,attachmentPath:null,allowText:true,allowImage:false,allowLink:false});$("questionPrompt").value="";await refresh();document.querySelector('[data-tab="question"]').click();toast("Question is live.");}catch(e){toast(e.message);}});
 
-async function questionPatch(patch){try{await teacherCall("update_question",{classroomId:classroom.id,questionId:activeQuestion.id,patch});await refresh();}catch(e){toast(e.message);}}
 $("clearAnswers").addEventListener("click",async()=>{if(!activeQuestion)return toast("No active question.");if(!confirm("Clear all answers for this question?"))return;try{await teacherCall("clear_answers",{classroomId:classroom.id,questionId:activeQuestion.id});await refresh();toast("Answers cleared.");}catch(e){toast(e.message);}});
-let answerRefreshTimer=null;
 if(teacherToken){
-  if(answerRefreshTimer)clearInterval(answerRefreshTimer);
-  answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);
   const savedRoomId=localStorage.getItem("hansali_classroom_id");
   if(savedRoomId){
     api("load",{teacherToken,classroomId:savedRoomId})
