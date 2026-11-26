@@ -10,3 +10,15 @@
 
 /* Replace the old single-item publishing cards with the slide editor. */
 #tab-content>.panel-title,.publish-tools,.current-content{display:none!important}
+
+.question-manager{display:grid;gap:10px;margin-top:18px}
+.question-manager-title{font:10px var(--mono);letter-spacing:.12em;color:var(--muted);padding:5px 0}
+.question-manage-row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f7f5ee;border:1px solid var(--line);padding:14px}
+.question-manage-row.is-hidden{opacity:.72;background:#e5e3dc}
+.question-manage-copy{display:grid;gap:6px;min-width:0}
+.question-manage-copy strong{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.question-manage-copy small,.question-number{font:9px var(--mono);color:var(--muted)}
+.question-manage-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.question-manage-actions button{border:1px solid var(--line);background:white;padding:8px 10px;font-size:10px;color:var(--navy);cursor:pointer}
+.question-manage-actions button.danger{color:#a52b2b;border-color:#dfbaba}
+@media(max-width:620px){.question-manage-row{align-items:flex-start;flex-direction:column}.question-manage-actions{justify-content:flex-start}}
