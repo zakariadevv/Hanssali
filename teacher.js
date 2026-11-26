@@ -1,11 +1,10 @@
 import { supabase } from "./supabase.js";
 import { MEDIA_BUCKET } from "./config.js";
 import { api, toast, uploadMedia } from "./api.js";
-import { watchClassroom } from "./classroom.js";
 import { createCanvasEditor } from "./canvas-editor.js";
 const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
-let classroom = null, stopWatch = null, activeQuestion = null, activeCanvasDocument = null, answerRefreshTimer = null;
+let classroom = null, activeQuestion = null, activeCanvasDocument = null, answerRefreshTimer = null;
 const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onResolveImage:path=>mediaUrl(path),onToast:message=>toast(message)});
 const studio = $("teacherStudio");
 function showStudio() { studio.classList.remove("hidden"); }
@@ -41,9 +40,9 @@ async function mediaUrl(path){const {data,error}=await supabase.storage.from(MED
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
 function ensureAnswerPolling(){if(answerRefreshTimer)return;answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);}
-async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);ensureAnswerPolling();if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
+async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);ensureAnswerPolling();}
 $("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
-$("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
+$("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
 $("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
 $("deleteClassroom").addEventListener("click",async()=>{
   if(!classroom)return;
@@ -52,7 +51,7 @@ $("deleteClassroom").addEventListener("click",async()=>{
   const button=$("deleteClassroom");button.disabled=true;button.textContent="Deleting…";
   try{
     await teacherCall("delete_classroom",{classroomId:classroom.id});
-    if(stopWatch){stopWatch();stopWatch=null;}
+    
     if(answerRefreshTimer){clearInterval(answerRefreshTimer);answerRefreshTimer=null;}
     localStorage.removeItem("hansali_teacher_token");
     localStorage.removeItem("hansali_classroom_id");
