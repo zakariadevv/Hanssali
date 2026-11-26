@@ -88,7 +88,7 @@ async function mediaUrl(path){const {data,error}=await supabase.storage.from(MED
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
 function ensureAnswerPolling(){if(answerRefreshTimer)return;answerRefreshTimer=setInterval(()=>{if(classroom)refresh().catch(()=>{});},4000);}
-async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);saveSession(room,teacherToken);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);ensureAnswerPolling();}
+async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);saveSession(room,teacherToken);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent="";showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);ensureAnswerPolling();}
 $("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);saveSession(r.classroom,teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
 $("logoutTeacher").addEventListener("click",()=>{
  localStorage.removeItem("hansali_teacher_token");
@@ -101,7 +101,7 @@ $("logoutTeacher").addEventListener("click",()=>{
  renderSavedSessions();showStudio();
  toast("Studio locked. Your saved sessions are still available on this device.");
 });
-$("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
+$("copyRoomLink").addEventListener("click",async()=>{const code=$("roomCodeDisplay").textContent.trim();if(!code||code==="------")return toast("Room code is not ready yet.");try{await navigator.clipboard.writeText(code);toast("Room code copied: "+code);}catch{toast("Could not copy the room code.");}});
 $("deleteClassroom").addEventListener("click",async()=>{
   if(!classroom)return;
   const title=classroom.title||"this classroom";
