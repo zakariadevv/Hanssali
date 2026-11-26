@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import { MEDIA_BUCKET } from "./config.js";
 import { api, toast } from "./api.js";
 import { watchClassroom } from "./classroom.js";
 import { showPresentation } from "./presentation.js";
@@ -7,7 +8,7 @@ let room=null,participantToken="",participantId="",stopWatch=null,currentQuestio
 const params=new URLSearchParams(location.search);
 if(params.get("room"))$("joinCode").value=params.get("room");
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-async function mediaUrl(path){const {data,error}=await supabase.storage.from("hanssali-media").createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
+async function mediaUrl(path){const {data,error}=await supabase.storage.from(MEDIA_BUCKET).createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
 async function join(code,name){const r=await api("join_classroom",{roomCode:code,displayName:name});room=r.classroom;participantToken=r.token;participantId=r.participantId;sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));try{$("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;await refresh();$("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(err=>toast(err.message,"studentToast")));setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);}catch(err){sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;throw err;}}
 $("joinForm").addEventListener("submit",async e=>{e.preventDefault();$("joinError").textContent="Joining…";try{await join($("joinCode").value.trim(),$("studentName").value.trim());$("joinError").textContent="";}catch(e){$("joinError").textContent=e.message;}});
 async function refresh(){
