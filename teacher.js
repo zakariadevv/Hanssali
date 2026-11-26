@@ -6,6 +6,8 @@ const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
 let classroom = null, activeQuestion = null, activeCanvasDocument = null, answerRefreshTimer = null;
 const SAVED_SESSIONS_KEY = "hansali_saved_sessions";
+const SAVED_SESSIONS_RESET_KEY = "hansali_sessions_reset_20261126";
+if(!localStorage.getItem(SAVED_SESSIONS_RESET_KEY)){localStorage.removeItem(SAVED_SESSIONS_KEY);localStorage.setItem(SAVED_SESSIONS_RESET_KEY,"1");}
 const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onResolveImage:path=>mediaUrl(path),onToast:message=>toast(message)});
 const studio = $("teacherStudio");
 function showStudio() { studio.classList.remove("hidden"); }
