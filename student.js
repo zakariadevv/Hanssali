@@ -1,41 +1,56 @@
 import { supabase } from "./supabase.js";
 import { MEDIA_BUCKET } from "./config.js";
 import { api, toast } from "./api.js";
-import { watchClassroom } from "./classroom.js";
 import { showPresentation } from "./presentation.js";
 const $=id=>document.getElementById(id);
-let room=null,participantToken="",participantId="",stopWatch=null,currentQuestion=null,heartbeatTimer=null;
+let room=null,participantToken="",participantId="",currentQuestion=null,heartbeatTimer=null,refreshTimer=null;
 const params=new URLSearchParams(location.search);
 if(params.get("room"))$("joinCode").value=params.get("room");
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function mediaUrl(path){const {data,error}=await supabase.storage.from(MEDIA_BUCKET).createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
-async function join(code,name){const r=await api("join_classroom",{roomCode:code,displayName:name});room=r.classroom;participantToken=r.token;participantId=r.participantId;sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));try{$("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;const ready=await refresh();if(!ready)throw new Error("This classroom has ended or was deleted.");$("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(err=>toast(err.message,"studentToast")));if(heartbeatTimer)clearInterval(heartbeatTimer);heartbeatTimer=setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);}catch(err){if(stopWatch){stopWatch();stopWatch=null;}if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;throw err;}}
-$("joinForm").addEventListener("submit",async e=>{e.preventDefault();$("joinError").textContent="Joining…";try{await join($("joinCode").value.trim(),$("studentName").value.trim());$("joinError").textContent="";}catch(e){$("joinError").textContent=e.message;}});
-async function refresh(){
- const [roomRes,contentRes,questionRes]=await Promise.all([
-  supabase.from("classrooms").select("*").eq("id",room.id).maybeSingle(),
-  supabase.from("classroom_content").select("*").eq("classroom_id",room.id).eq("is_active",true).order("created_at",{ascending:false}).limit(1),
-  supabase.from("questions").select("*").eq("classroom_id",room.id).order("created_at",{ascending:false}).limit(1)
- ]);
- if(roomRes.error)throw roomRes.error;
- if(!roomRes.data||roomRes.data.status!=="open"){
-  if(stopWatch){stopWatch();stopWatch=null;}
+async function join(code,name){
+ const r=await api("join_classroom",{roomCode:code,displayName:name});
+ room=r.classroom;participantToken=r.token;participantId=r.participantId;
+ sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));
+ try{
+  $("classTitle").textContent=room.title.toUpperCase();
+  $("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;
+  const ready=await refresh();
+  if(!ready)throw new Error("This classroom has ended or was deleted.");
+  $("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");
+  if(refreshTimer)clearInterval(refreshTimer);
+  refreshTimer=setInterval(()=>{if(room&&participantToken)refresh().catch(err=>toast(err.message,"studentToast"));},4000);
+  if(heartbeatTimer)clearInterval(heartbeatTimer);
+  heartbeatTimer=setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);
+ }catch(err){
+  if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}
   if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
-  sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;currentQuestion=null;
-  $("classroomScreen").classList.add("hidden");$("joinScreen").classList.remove("hidden");
-  $("joinError").textContent="This classroom has ended or was deleted by the teacher.";
+  sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;
+  throw err;
+ }
+}
+$("joinForm").addEventListener("submit",async e=>{e.preventDefault();$("joinError").textContent="Joining…";try{await join($("joinCode").value.trim(),$("studentName").value.trim());$("joinError").textContent="";}catch(e){$("joinError").textContent=e.message;}});
+function showEndedClassroom(){
+ if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}
+ if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
+ sessionStorage.removeItem("hansali_participant");
+ participantToken="";participantId="";room=null;currentQuestion=null;
+ $("classroomScreen").classList.add("hidden");$("joinScreen").classList.remove("hidden");
+ $("joinError").textContent="This classroom has ended or was deleted by the teacher.";
+}
+async function refresh(){
+ if(!room||!participantToken)return false;
+ const data=await api("student_load",{participantToken});
+ if(data.ended||!data.classroom||data.classroom.status!=="open"){
+  showEndedClassroom();
   return false;
  }
- room=roomRes.data;
- if(contentRes.error)throw contentRes.error;
- if(questionRes.error)throw questionRes.error;
+ room=data.classroom;
  $("classTitle").textContent=room.title.toUpperCase();
- const content=contentRes.data?.[0];currentQuestion=questionRes.data?.[0]||null;
- const wallRes=currentQuestion?await supabase.from("answer_wall_items").select("*").eq("classroom_id",room.id).eq("question_id",currentQuestion.id).order("created_at",{ascending:false}).limit(50):{data:[]};
- if(wallRes.error)throw wallRes.error;
- renderContent(content,room.theme);
+ currentQuestion=data.question||null;
+ renderContent(data.content||null,room.theme);
  renderQuestion(currentQuestion,room);
- renderWall(wallRes.data||[]);
+ renderWall(data.answers||[]);
  $("stageMode").textContent=room.current_mode.toUpperCase()+" MODE";
  return true;
 }
@@ -91,4 +106,16 @@ $("answerForm").addEventListener("submit",async e=>{e.preventDefault();if(!curre
 $("expandPresentation").addEventListener("click",()=>$("presentationPanel").classList.toggle("floating"));
 $("fullscreenPresentation").addEventListener("click",()=>{const el=$("presentationPanel");if(!document.fullscreenElement)el.requestFullscreen?.();else document.exitFullscreen?.();});
 const saved=JSON.parse(sessionStorage.getItem("hansali_participant")||"null");
-if(saved?.token&&saved.room){api("resume_participant",{participantToken:saved.token}).then(async r=>{participantToken=saved.token;participantId=r.participantId;room=r.classroom;$("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");$("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent="ROOM / "+room.room_code;await refresh();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);}).catch(()=>sessionStorage.removeItem("hansali_participant"));}
+if(saved?.token&&saved.room){
+ api("resume_participant",{participantToken:saved.token}).then(async r=>{
+  participantToken=saved.token;participantId=r.participantId;room=r.classroom;
+  $("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");
+  $("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent="ROOM / "+room.room_code;
+  const ready=await refresh();
+  if(!ready)return;
+  if(refreshTimer)clearInterval(refreshTimer);
+  refreshTimer=setInterval(()=>{if(room&&participantToken)refresh().catch(err=>toast(err.message,"studentToast"));},4000);
+  if(heartbeatTimer)clearInterval(heartbeatTimer);
+  heartbeatTimer=setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);
+ }).catch(()=>{sessionStorage.removeItem("hansali_participant");});
+}
