@@ -4,12 +4,12 @@ import { api, toast } from "./api.js";
 import { watchClassroom } from "./classroom.js";
 import { showPresentation } from "./presentation.js";
 const $=id=>document.getElementById(id);
-let room=null,participantToken="",participantId="",stopWatch=null,currentQuestion=null;
+let room=null,participantToken="",participantId="",stopWatch=null,currentQuestion=null,heartbeatTimer=null;
 const params=new URLSearchParams(location.search);
 if(params.get("room"))$("joinCode").value=params.get("room");
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 async function mediaUrl(path){const {data,error}=await supabase.storage.from(MEDIA_BUCKET).createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
-async function join(code,name){const r=await api("join_classroom",{roomCode:code,displayName:name});room=r.classroom;participantToken=r.token;participantId=r.participantId;sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));try{$("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;await refresh();$("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(err=>toast(err.message,"studentToast")));setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);}catch(err){sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;throw err;}}
+async function join(code,name){const r=await api("join_classroom",{roomCode:code,displayName:name});room=r.classroom;participantToken=r.token;participantId=r.participantId;sessionStorage.setItem("hansali_participant",JSON.stringify({token:participantToken,room:room.room_code,participantId}));try{$("classTitle").textContent=room.title.toUpperCase();$("studentRoomLabel").textContent=`ROOM / ${room.room_code}`;const ready=await refresh();if(!ready)throw new Error("This classroom has ended or was deleted.");$("joinScreen").classList.add("hidden");$("classroomScreen").classList.remove("hidden");if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(err=>toast(err.message,"studentToast")));if(heartbeatTimer)clearInterval(heartbeatTimer);heartbeatTimer=setInterval(()=>api("participant_heartbeat",{participantToken}).catch(()=>{}),45000);}catch(err){if(stopWatch){stopWatch();stopWatch=null;}if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;throw err;}}
 $("joinForm").addEventListener("submit",async e=>{e.preventDefault();$("joinError").textContent="Joining…";try{await join($("joinCode").value.trim(),$("studentName").value.trim());$("joinError").textContent="";}catch(e){$("joinError").textContent=e.message;}});
 async function refresh(){
  const [roomRes,contentRes,questionRes]=await Promise.all([
@@ -18,9 +18,17 @@ async function refresh(){
   supabase.from("questions").select("*").eq("classroom_id",room.id).order("created_at",{ascending:false}).limit(1)
  ]);
  if(roomRes.error)throw roomRes.error;
+ if(!roomRes.data||roomRes.data.status!=="open"){
+  if(stopWatch){stopWatch();stopWatch=null;}
+  if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null;}
+  sessionStorage.removeItem("hansali_participant");participantToken="";participantId="";room=null;currentQuestion=null;
+  $("classroomScreen").classList.add("hidden");$("joinScreen").classList.remove("hidden");
+  $("joinError").textContent="This classroom has ended or was deleted by the teacher.";
+  return false;
+ }
+ room=roomRes.data;
  if(contentRes.error)throw contentRes.error;
  if(questionRes.error)throw questionRes.error;
- if(roomRes.data)room=roomRes.data;
  $("classTitle").textContent=room.title.toUpperCase();
  const content=contentRes.data?.[0];currentQuestion=questionRes.data?.[0]||null;
  const wallRes=currentQuestion?await supabase.from("answer_wall_items").select("*").eq("classroom_id",room.id).eq("question_id",currentQuestion.id).order("created_at",{ascending:false}).limit(50):{data:[]};
@@ -29,6 +37,7 @@ async function refresh(){
  renderQuestion(currentQuestion,room);
  renderWall(wallRes.data||[]);
  $("stageMode").textContent=room.current_mode.toUpperCase()+" MODE";
+ return true;
 }
 function renderContent(c,theme={}){
  const host=$("teacherContent"),presentationPanel=$("presentationPanel");
