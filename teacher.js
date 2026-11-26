@@ -1,9 +1,11 @@
 import { supabase } from "./supabase.js";
 import { api, toast, uploadMedia } from "./api.js";
 import { watchClassroom } from "./classroom.js";
+import { createCanvasEditor } from "./canvas-editor.js";
 const $ = (id) => document.getElementById(id);
 let teacherToken = localStorage.getItem("hansali_teacher_token") || "";
-let classroom = null, stopWatch = null, activeQuestion = null;
+let classroom = null, stopWatch = null, activeQuestion = null, activeCanvasDocument = null;
+const canvasEditor = createCanvasEditor({root:$("canvasEditor"),onSave:document=>teacherCall("save_canvas",{classroomId:classroom.id,document}),onUpload:async file=>{const up=await uploadMedia(file,{classroomId:classroom.id,teacherToken});return {...up,url:await mediaUrl(up.path)};},onToast:message=>toast(message)});
 const studio = $("teacherStudio");
 function showStudio() { studio.classList.remove("hidden"); }
 async function teacherCall(action, extra={}) { return api(action,{teacherToken,...extra}); }
@@ -21,6 +23,8 @@ async function refresh() {
   $("toggleIdentities").checked=classroom.identities_visible;
   $("contentList").innerHTML=data.content.length?data.content.map(c=>`<div class="item-row"><span>${escapeHtml(c.kind.toUpperCase())} · ${escapeHtml(c.payload?.text||c.payload?.name||c.payload?.url||"Published item")}</span><small>${new Date(c.created_at).toLocaleTimeString()}</small></div>`).join(""):'<p class="muted">Nothing published yet.</p>';
   activeQuestion=data.questions[0]||null;
+  const canvasContent=data.content.find(c=>c.kind==="canvas"&&c.is_active);
+  activeCanvasDocument=canvasContent?.payload?.document||null;
   $("activeQuestion").innerHTML=activeQuestion?`<div class="item-row"><span>${escapeHtml(activeQuestion.prompt)}</span><small>${activeQuestion.is_open?"OPEN":"CLOSED"}</small><button id="toggleQuestion">${activeQuestion.is_open?"Close":"Reopen"}</button><button id="toggleReveal">${activeQuestion.show_answers?"Hide answers":"Reveal answers"}</button></div>`:"";
   const layout=activeQuestion?.display_layout||{direction:"vertical",order:"text-first",align:"center",image_width:55};
   $("questionDirection").value=layout.direction||"vertical";$("questionOrder").value=layout.order||"text-first";$("questionAlign").value=layout.align||"center";$("questionImageWidth").value=layout.image_width||55;$("questionImageWidthValue").textContent=(layout.image_width||55)+"%";
@@ -38,7 +42,7 @@ async function refresh() {
 async function mediaUrl(path){const {data,error}=await supabase.storage.from("hanssali-media").createSignedUrl(path,3600);if(error)throw error;return data.signedUrl;}
 function escapeHtml(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escapeAttr(s=""){return escapeHtml(s);}
-async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
+async function loadRoom(room){classroom=room;localStorage.setItem("hansali_classroom_id",room.id);$("noClassroom").classList.add("hidden");$("classroomPanel").classList.remove("hidden");$("roomLinkText").textContent=`${location.origin}${location.pathname.replace("teacher.html","student.html")}?room=${room.room_code}`;showStudio();await refresh();canvasEditor.loadDocument(activeCanvasDocument);if(stopWatch)stopWatch();stopWatch=watchClassroom(supabase,room.id,()=>refresh().catch(()=>{}));}
 $("createRoomForm").addEventListener("submit",async e=>{e.preventDefault();try{const r=await teacherCall("create_classroom",{title:$("roomTitle").value});teacherToken=r.teacherToken;localStorage.setItem("hansali_teacher_token",teacherToken);await loadRoom(r.classroom);toast("Classroom created.");}catch(err){toast(err.message);}});
 $("logoutTeacher").addEventListener("click",async()=>{try{if(classroom)await teacherCall("teacher_revoke_session",{classroomId:classroom.id});}catch{}localStorage.removeItem("hansali_teacher_token");localStorage.removeItem("hansali_classroom_id");teacherToken="";classroom=null;if(stopWatch)stopWatch();$("classroomPanel").classList.add("hidden");$("noClassroom").classList.remove("hidden");showStudio();});
 $("copyRoomLink").addEventListener("click",async()=>{await navigator.clipboard.writeText($("roomLinkText").textContent);toast("Student link copied.");});
