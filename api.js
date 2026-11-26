@@ -1,4 +1,4 @@
-import { API_URL, SUPABASE_PUBLISHABLE_KEY, MEDIA_BUCKET } from "./config.js";
+import { API_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
 export async function api(action, payload = {}, endpoint = "hansali-api") {
   const response = await fetch(`${API_URL}/${endpoint}`, {
     method: "POST",
