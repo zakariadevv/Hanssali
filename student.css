@@ -121,3 +121,29 @@ html[data-theme="dark"] .question-display .answer-wall-section{background:rgba(2
 html[data-theme="dark"] .question-display .answer-card{background:#26364d;border-color:#3c4d66}
 html[data-theme="dark"] .question-display .answer-card p{color:#edf2fa}
 html[data-theme="dark"] .question-display .answer-card small{background:#344966;color:#c5d5ee}
+
+
+/* DARK MODE COLOR & CONTRAST REFINEMENT — student area */
+html[data-theme="dark"] .student-page .join-screen{color:#edf2fa}
+html[data-theme="dark"] .student-page .join-copy h1{color:#f1f5fb}
+html[data-theme="dark"] .student-page .join-art{background:linear-gradient(145deg,#202d40,#292b3d)}
+html[data-theme="dark"] .student-page .join-note{background:#29374c;color:#edf2fa;border:1px solid #465570}
+html[data-theme="dark"] .student-page .join-art>.mono,
+html[data-theme="dark"] .student-page .student-top .mono{color:#b5c1d1}
+html[data-theme="dark"] .student-page .classroom-stage{background:#1b2638;color:#edf2fa;border:1px solid #354258}
+html[data-theme="dark"] .student-page .stage-meta,
+html[data-theme="dark"] .student-page .wall-heading,
+html[data-theme="dark"] .student-page .composer-heading{color:#bdc9d9}
+html[data-theme="dark"] .student-page .stage-placeholder{color:#9eacc0}
+html[data-theme="dark"] .student-page .answer-wall-section{background:#182437;border-color:#3b4b63}
+html[data-theme="dark"] .student-page .answer-card,
+html[data-theme="dark"] .student-page .question-display .answer-card{background:#26364d!important;border-color:#465570;color:#edf2fa}
+html[data-theme="dark"] .student-page .answer-card p,
+html[data-theme="dark"] .student-page .question-display .answer-card p{color:#f1f5fb}
+html[data-theme="dark"] .student-page .answer-card small,
+html[data-theme="dark"] .student-page .question-display .answer-card small{background:#344966;color:#dce8f8}
+html[data-theme="dark"] .student-page #answerComposer.answer-composer{background:rgba(24,36,55,.96);border-color:#465570}
+html[data-theme="dark"] .student-page #answerComposer textarea{background:#111c2d;color:#f1f5fb;border-color:#465570}
+html[data-theme="dark"] .student-page #answerComposer textarea::placeholder{color:#93a2b8}
+html[data-theme="dark"] .student-page #answerComposer .tiny{color:#bdc9d9}
+html[data-theme="dark"] .student-page .presentation-panel{background:#101722}
