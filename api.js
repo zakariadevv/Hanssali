@@ -1,4 +1,4 @@
-import { API_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
+import { API_URL, SUPABASE_PUBLISHABLE_KEY, MEDIA_BUCKET } from "./config.js";
 export async function api(action, payload = {}, endpoint = "hansali-api") {
   const response = await fetch(`${API_URL}/${endpoint}`, {
     method: "POST",
@@ -25,6 +25,6 @@ export async function uploadMedia(file, context = {}) {
   const { error } = await supabase.storage.from(MEDIA_BUCKET).uploadToSignedUrl(
     signed.path, signed.token, file, { contentType: file.type || "application/octet-stream" }
   );
-  if (error) throw error;
+  if (error) throw new Error(error.message || "Could not upload the file to storage.");
   return { path: signed.path, url: null };
 }
