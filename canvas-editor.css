@@ -46,3 +46,38 @@ html[data-theme="dark"] .ce-field textarea,html[data-theme="dark"] .ce-field sel
 html[data-theme="dark"] .ce-delete{background:#321f2a;color:#ffb8bd;border-color:#70404a}
 html[data-theme="dark"] .ce-slide-thumb{background:#202d42!important;border-color:#465570!important;color:#edf2fa}
 html[data-theme="dark"] .ce-thumb-preview{border-color:#465570}
+
+
+/* DARK MODE COLOR & CONTRAST REFINEMENT — slide editor controls */
+html[data-theme="dark"] .canvas-editor{background:#151e2d;color:#edf2fa;border-color:#3b4b63}
+html[data-theme="dark"] .ce-top,html[data-theme="dark"] .ce-tools,
+html[data-theme="dark"] .ce-properties,html[data-theme="dark"] .ce-slidebar{
+ background:#1b2638!important;color:#edf2fa;border-color:#3a4960!important
+}
+html[data-theme="dark"] .ce-middle{background:#151e2d}
+html[data-theme="dark"] .ce-top>div:first-child span,
+html[data-theme="dark"] .ce-top-actions>span,
+html[data-theme="dark"] .ce-slidebar-head,
+html[data-theme="dark"] .ce-slidebar-head b{color:#c0ccdc}
+html[data-theme="dark"] .ce-prop-head{background:#202d40;color:#edf2fa;border-color:#3a4960}
+html[data-theme="dark"] .ce-prop-head small{color:#a9c6f2}
+html[data-theme="dark"] .ce-tools button{color:#c7d2e2}
+html[data-theme="dark"] .ce-tools button.active,
+html[data-theme="dark"] .ce-tools button:hover{background:#344966;color:#f1f5fb}
+html[data-theme="dark"] .ce-top button,html[data-theme="dark"] .ce-slidebar button,
+html[data-theme="dark"] .ce-layer-actions button{background:#29374c;color:#edf2fa;border-color:#53637a}
+html[data-theme="dark"] .ce-top .ce-save,
+html[data-theme="dark"] .ce-slidebar .ce-add-slide{background:#d4e2f7;color:#17243a;border-color:#d4e2f7}
+html[data-theme="dark"] .ce-field,html[data-theme="dark"] .ce-check,
+html[data-theme="dark"] .ce-empty,html[data-theme="dark"] .ce-hint,
+html[data-theme="dark"] .ce-shortcuts,html[data-theme="dark"] .ce-canvas-controls{color:#bdc9d9}
+html[data-theme="dark"] .ce-field input:not([type=color]),
+html[data-theme="dark"] .ce-field textarea,html[data-theme="dark"] .ce-field select{
+ background:#111c2d!important;color:#f1f5fb!important;border-color:#465570!important
+}
+html[data-theme="dark"] .ce-field input[type=color]{background:#29374c;border-color:#53637a}
+html[data-theme="dark"] .ce-delete{background:#482a34;color:#ffc4ca;border-color:#87505b}
+html[data-theme="dark"] .ce-slide-thumb{background:#202d40!important;color:#edf2fa!important;border-color:#53637a!important}
+html[data-theme="dark"] .ce-slide-thumb.active{outline-color:#9bbcf0;border-color:#9bbcf0!important}
+html[data-theme="dark"] .ce-thumb-preview{border-color:#53637a}
+html[data-theme="dark"] .ce-resize{background:#edf2fa;border-color:#79a4ed}
