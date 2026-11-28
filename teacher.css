@@ -72,3 +72,44 @@ html[data-theme="dark"] .teacher-page h4{color:#edf2fa}
 html[data-theme="dark"] .teacher-page .room-banner p,
 html[data-theme="dark"] .teacher-page .mono,
 html[data-theme="dark"] .teacher-page label{color:#aab6c7}
+
+
+/* DARK MODE COLOR & CONTRAST REFINEMENT — teacher studio */
+html[data-theme="dark"] .teacher-page .create-panel,
+html[data-theme="dark"] .teacher-page .saved-sessions,
+html[data-theme="dark"] .teacher-page .control-rail,
+html[data-theme="dark"] .teacher-page .studio-main,
+html[data-theme="dark"] .teacher-page .tool-panel,
+html[data-theme="dark"] .teacher-page .question-layout-controls,
+html[data-theme="dark"] .teacher-page .question-manage-row,
+html[data-theme="dark"] .teacher-page .saved-session-row,
+html[data-theme="dark"] .teacher-page .item-row,
+html[data-theme="dark"] .teacher-page .teacher-answer{
+ background:#1b2638!important;color:#edf2fa;border-color:#3a4960!important
+}
+html[data-theme="dark"] .teacher-page .create-panel h2,
+html[data-theme="dark"] .teacher-page .saved-sessions h2,
+html[data-theme="dark"] .teacher-page .studio-heading h1,
+html[data-theme="dark"] .teacher-page .question-manage-copy strong,
+html[data-theme="dark"] .teacher-page .saved-session-info strong,
+html[data-theme="dark"] .teacher-page .teacher-answer p{color:#edf2fa}
+html[data-theme="dark"] .teacher-page .muted,
+html[data-theme="dark"] .teacher-page .panel-index,
+html[data-theme="dark"] .teacher-page .question-manage-copy small,
+html[data-theme="dark"] .teacher-page .question-number,
+html[data-theme="dark"] .teacher-page .saved-session-info span,
+html[data-theme="dark"] .teacher-page .saved-session-count,
+html[data-theme="dark"] .teacher-page .teacher-answer .mono,
+html[data-theme="dark"] .teacher-page .tiny{color:#aab8ca}
+html[data-theme="dark"] .teacher-page .tool-tabs{background:#172235;border-color:#3a4960}
+html[data-theme="dark"] .teacher-page .tab{color:#b5c1d1}
+html[data-theme="dark"] .teacher-page .tab.active{color:#f1f5fb;border-image:linear-gradient(90deg,#8ccBff,#c8cdd8,#f3b9d5) 1}
+html[data-theme="dark"] .teacher-page .question-manage-actions button,
+html[data-theme="dark"] .teacher-page .saved-session-actions button{
+ background:#29374c;color:#edf2fa;border-color:#53637a
+}
+html[data-theme="dark"] .teacher-page .question-manage-actions button.danger,
+html[data-theme="dark"] .teacher-page .btn-danger{background:#482a34;color:#ffc4ca;border-color:#87505b}
+html[data-theme="dark"] .teacher-page .toggle-row{color:#e2eaf5;border-color:#3a4960}
+html[data-theme="dark"] .teacher-page .swatches button{border-color:#718096}
+html[data-theme="dark"] .teacher-page .room-banner{background:linear-gradient(125deg,#172235,#223653 68%,#34314b)!important}
