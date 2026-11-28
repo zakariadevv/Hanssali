@@ -105,3 +105,19 @@
 .live-state{color:#668eae}
 .live-state i{background:linear-gradient(135deg,#8ccBff,#d8b5cf)}
 .answer-card.highlight{outline-color:#91a9d2}
+
+
+/* Dark theme — student classroom */
+html[data-theme="dark"] .student-page{background:#111827;color:#e8edf5}
+html[data-theme="dark"] .student-top{background:#111827;border-color:#354258}
+html[data-theme="dark"] .join-art{background:#202b3c}
+html[data-theme="dark"] .join-note{background:#29374c;color:#edf2fa}
+html[data-theme="dark"] .classroom-stage{background:#1b2638;color:#edf2fa}
+html[data-theme="dark"] .stage-meta,html[data-theme="dark"] .wall-heading,
+html[data-theme="dark"] .composer-heading{color:#aab6c7}
+html[data-theme="dark"] .answer-composer{background:rgba(25,36,54,.9);border-color:#46546a}
+html[data-theme="dark"] #answerComposer textarea{background:#111c2d;color:#edf2fa;border-color:#3b4a61}
+html[data-theme="dark"] .question-display .answer-wall-section{background:rgba(27,38,56,.92);border-color:#43516a}
+html[data-theme="dark"] .question-display .answer-card{background:#26364d;border-color:#3c4d66}
+html[data-theme="dark"] .question-display .answer-card p{color:#edf2fa}
+html[data-theme="dark"] .question-display .answer-card small{background:#344966;color:#c5d5ee}
