@@ -49,3 +49,26 @@
 .saved-session-actions .btn{min-width:110px}
 .saved-empty{font-size:12px;padding:12px 0}
 @media(max-width:620px){.saved-sessions{padding:20px 16px}.saved-session-row{align-items:flex-start;flex-direction:column}.saved-session-actions{width:100%}.saved-session-actions .btn{flex:1;min-width:0}.saved-sessions-heading h2{font-size:25px}}
+
+
+/* Dark theme — teacher control room */
+html[data-theme="dark"] .teacher-page .create-panel,
+html[data-theme="dark"] .teacher-page .saved-sessions,
+html[data-theme="dark"] .teacher-page .room-banner,
+html[data-theme="dark"] .teacher-page .control-rail,
+html[data-theme="dark"] .teacher-page .tool-card,
+html[data-theme="dark"] .teacher-page .question-form,
+html[data-theme="dark"] .teacher-page .active-question,
+html[data-theme="dark"] .teacher-page .current-content,
+html[data-theme="dark"] .teacher-page .saved-session-card,
+html[data-theme="dark"] .teacher-page .answer-card{background:#1b2638;color:#e8edf5;border-color:#354258}
+html[data-theme="dark"] .teacher-page .tool-tabs,
+html[data-theme="dark"] .teacher-page .tool-panel{background:transparent;color:#e8edf5}
+html[data-theme="dark"] .teacher-page .tab{color:#aab6c7}
+html[data-theme="dark"] .teacher-page .tab.active{color:#e8edf5;border-color:#8aa9df}
+html[data-theme="dark"] .teacher-page .panel-title h3,
+html[data-theme="dark"] .teacher-page h2,html[data-theme="dark"] .teacher-page h3,
+html[data-theme="dark"] .teacher-page h4{color:#edf2fa}
+html[data-theme="dark"] .teacher-page .room-banner p,
+html[data-theme="dark"] .teacher-page .mono,
+html[data-theme="dark"] .teacher-page label{color:#aab6c7}
