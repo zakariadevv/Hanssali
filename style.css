@@ -122,3 +122,38 @@
 .about-clean-cta{padding:38px 42px;background:linear-gradient(115deg,#e8eef6,#ece6ee 68%,#efeee9);display:flex;justify-content:space-between;align-items:center;gap:25px}.about-clean-cta h2{margin-top:14px}.about-clean-cta>a{display:inline-flex;align-items:center;gap:26px;padding:16px 19px;background:#202b3c;color:white;font:10px var(--mono);letter-spacing:.08em;white-space:nowrap}.about-clean-cta>a b{font-size:15px}
 @media(max-width:820px){.about-clean-main{padding:0 23px 62px}.about-clean-hero{grid-template-columns:1fr;gap:28px;padding:42px 0 35px;min-height:0}.about-clean-heading{padding:0}.about-clean-heading h1{font-size:clamp(65px,15vw,96px);margin:28px 0 22px}.about-clean-hero-art{height:420px}.about-clean-portrait-frame{width:min(66vw,270px)}.about-clean-orbit{width:min(88vw,370px)}.about-clean-orbit-b{width:min(102vw,430px)}.about-clean-facts{grid-template-columns:1fr 1fr;margin-bottom:65px}.about-clean-facts>div{padding:18px 10px 18px 0}.about-clean-facts>div:not(:first-child){padding-left:14px}.about-clean-facts>div:nth-child(2){border-right:0}.about-clean-facts>div:nth-child(3){padding-left:0}.about-clean-story-grid{grid-template-columns:1fr;gap:20px}.about-clean-story,.about-clean-purpose{padding-bottom:62px}.about-clean-purpose-grid{grid-template-columns:1fr;gap:12px}.about-clean-purpose-grid article{min-height:0}.about-clean-purpose-grid h3{margin:17px 0 8px}.about-clean-cta{padding:28px 23px;align-items:flex-start;flex-direction:column}}
 @media(max-width:460px){.about-clean .main-nav{gap:10px}.about-clean .main-nav .nav-link{font-size:8px}.about-clean-hero-art{height:360px}.about-clean-photo-caption{right:4%;bottom:9%;padding:10px 12px}.about-clean-photo-caption strong{font-size:12px}.about-clean-cta>a{font-size:9px}}
+
+
+/* HANSALI theme system */
+html[data-theme="dark"]{
+ color-scheme:dark;
+ --paper:#111827;--navy:#e8edf5;--ink:#e8edf5;--silver:#39465a;--pink:#55445d;
+ --muted:#9aa8ba;--line:rgba(190,204,224,.16);
+}
+html[data-theme="dark"] body{background:var(--paper);color:var(--navy)}
+html[data-theme="dark"] .topbar,html[data-theme="dark"] .site-footer{border-color:var(--line)}
+html[data-theme="dark"] .brand,html[data-theme="dark"] .brand .brand-word{color:#edf2fa}
+html[data-theme="dark"] .hero-sub,html[data-theme="dark"] .muted,
+html[data-theme="dark"] .about-clean-intro,html[data-theme="dark"] .about-clean-story-grid>div,
+html[data-theme="dark"] .about-clean-purpose-grid p{color:#aab6c7}
+html[data-theme="dark"] .hero-art,html[data-theme="dark"] .about-clean-hero-art{background:#202b3c}
+html[data-theme="dark"] .art-card,html[data-theme="dark"] .about-clean-photo-caption{background:#263449;color:#edf2fa}
+html[data-theme="dark"] .art-card span,html[data-theme="dark"] .art-stamp,html[data-theme="dark"] .art-caption{color:#b2bfd0}
+html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{
+ background:#1b2638;color:#edf2fa;border-color:#3a4960
+}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#8291a6}
+html[data-theme="dark"] .btn-outline{color:#edf2fa;border-color:#53627a}
+html[data-theme="dark"] .btn-light{background:#29374c;color:#edf2fa}
+html[data-theme="dark"] .text-link,html[data-theme="dark"] .about-clean-link{border-color:#8798b0}
+html[data-theme="dark"] .about-clean-facts,html[data-theme="dark"] .about-clean-facts>div,
+html[data-theme="dark"] .about-clean-section-head i{border-color:#354258}
+html[data-theme="dark"] .about-clean-value-grid article,html[data-theme="dark"] .about-clean-purpose-grid article{background:#1b2638;border-color:#354258}
+html[data-theme="dark"] .about-clean-bottom,html[data-theme="dark"] .about-clean-cta{background:linear-gradient(115deg,#202d42,#302b3d 70%,#292d35)}
+.theme-toggle{
+ margin-left:14px;flex:0 0 auto;border:1px solid var(--line);border-radius:999px;
+ padding:9px 13px;background:transparent;color:inherit;font:10px var(--mono);
+ letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s,transform .2s
+}
+.theme-toggle:hover{background:rgba(120,155,209,.13);transform:translateY(-1px)}
+@media(max-width:750px){.theme-toggle{margin-left:6px;padding:8px 9px;font-size:9px}.topbar{gap:8px}.student-top{gap:8px}}
